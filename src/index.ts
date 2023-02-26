@@ -1,4 +1,5 @@
 import { Client, Events, GatewayIntentBits } from "discord.js";
+import { handleSlashCommands } from "./commands";
 
 const client = new Client({
   intents: [
@@ -8,8 +9,6 @@ const client = new Client({
   ],
 });
 
-client.login(process.env.CLIENT_TOKEN);
-
 client.once(Events.ClientReady, (c) => {
   console.log(`Ready! Logged in as ${c.user.tag}`);
 });
@@ -17,3 +16,7 @@ client.once(Events.ClientReady, (c) => {
 client.on(Events.MessageCreate, async (message) => {
   console.log(message.content);
 });
+
+client.on(Events.InteractionCreate, handleSlashCommands);
+
+client.login(process.env.CLIENT_TOKEN);
