@@ -7,14 +7,18 @@
   "license": "ISC",
   "main": "dist/index.js",
   "scripts": {
-    "start": "ts-node ./src/index.ts",
-    "dev": "ts-node-dev --respawn ./src/index.ts",
+    "start": "ts-node -r dotenv/config ./src/index.ts",
+    "dev": "ts-node-dev -r dotenv/config --respawn ./src/index.ts",
     "prettier:check": "prettier --ignore-path .gitignore --check .",
     "prettier:fix": "prettier --ignore-path .gitignore --write .",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
+  "dependencies": {
+    "discord.js": "^14.7.1"
+  },
   "devDependencies": {
     "@types/node": "^18.14.1",
+    "dotenv": "^16.0.3",
     "prettier": "^2.8.4",
     "ts-node": "^10.9.1",
     "ts-node-dev": "^2.0.0",
