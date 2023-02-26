@@ -7,6 +7,7 @@
   "license": "ISC",
   "main": "dist/index.js",
   "scripts": {
+    "build": "tsc",
     "start": "ts-node -r dotenv/config ./src/index.ts",
     "dev": "ts-node-dev -r dotenv/config --respawn ./src/index.ts",
     "prettier:check": "prettier --ignore-path .gitignore --check .",
