@@ -35,6 +35,7 @@ model AllTimeScore {
 
 model MonthlyScore {
   id                   String             @id @default(auto()) @map("_id") @db.ObjectId
+  month                String
   discordChannelId     String
   channelLeaderboard   ChannelLeaderboard @relation(fields: [channelLeaderboardId], references: [id])
   channelLeaderboardId String             @db.ObjectId
