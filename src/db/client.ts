@@ -15,7 +15,7 @@ if (process.env.NODE_ENV === "development") {
 // Export all the generated types
 export type {
   AggregateWordleResult,
+  ChannelLeaderboard,
   DiscordUser,
-  Leaderboard,
   WordleResult,
 } from "@prisma/client";
