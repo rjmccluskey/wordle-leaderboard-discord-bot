@@ -7,15 +7,17 @@
   "license": "ISC",
   "main": "dist/index.js",
   "scripts": {
-    "build": "tsc",
-    "start": "ts-node -r dotenv/config ./src/index.ts",
+    "build": "prisma generate && tsc",
+    "commands:deploy": "ts-node -r dotenv/config ./src/commands/deploy-commands.ts",
     "dev": "ts-node-dev -r dotenv/config --respawn ./src/index.ts",
     "prettier:check": "prettier --ignore-path .gitignore --check .",
     "prettier:fix": "prettier --ignore-path .gitignore --write .",
-    "commands:deploy": "ts-node -r dotenv/config ./src/commands/deploy-commands.ts",
+    "prisma:gen": "prisma format && prisma generate",
+    "start": "ts-node -r dotenv/config ./src/index.ts",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "dependencies": {
+    "@prisma/client": "^4.10.1",
     "discord.js": "^14.7.1"
   },
   "devDependencies": {
