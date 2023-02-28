@@ -1,5 +1,6 @@
 import { SlashCommandBuilder, ChatInputCommandInteraction } from "discord.js";
 import { client } from "../db";
+import { setChannelIsEnabled } from "../cache";
 
 export const ADD_WORDLE_LEADERBOARD = "add-wordle-leaderboard";
 
@@ -25,6 +26,7 @@ export async function execute(interaction: ChatInputCommandInteraction) {
       discordChannelId: interaction.channelId,
     },
   });
+  setChannelIsEnabled(interaction.channelId, true);
   await interaction.editReply(
     "Wordle Leaderboard has been added! Scores will be posted daily at midnight."
   );

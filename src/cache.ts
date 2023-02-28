@@ -10,6 +10,6 @@ export function setChannelIsEnabled(channelId: string, isEnabled: boolean) {
   cache.enabledChannels[channelId] = isEnabled;
 }
 
-export function getChannelIsEnabled(channelId: string): boolean {
-  return Boolean(cache.enabledChannels[channelId]);
+export function getChannelIsEnabled(channelId: string): boolean | undefined {
+  return cache.enabledChannels[channelId];
 }
