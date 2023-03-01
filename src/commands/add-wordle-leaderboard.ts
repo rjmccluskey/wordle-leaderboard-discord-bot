@@ -1,9 +1,14 @@
-import { SlashCommandBuilder, ChatInputCommandInteraction } from "discord.js";
+import {
+  SlashCommandBuilder,
+  ChatInputCommandInteraction,
+  TextChannel,
+} from "discord.js";
 import {
   createChannelLeaderboard,
   getChannelLeaderboardByChannelId,
 } from "../db";
 import { setChannelIsEnabled } from "../cache";
+import { backfillChannelScores } from "../backfillChannelScores";
 
 export const ADD_WORDLE_LEADERBOARD = "add-wordle-leaderboard";
 
@@ -36,7 +41,13 @@ export async function execute(interaction: ChatInputCommandInteraction) {
   );
   await createChannelLeaderboard({ discordChannelId });
 
-  // TODO: Backfill scores before enabling
+  if (!interaction.channel) {
+    console.error(
+      `Channel object missing from interaction with channelId ${discordChannelId}!`
+    );
+    return;
+  }
+  await backfillChannelScores(interaction.channel as TextChannel);
 
   setChannelIsEnabled(discordChannelId, true);
   await interaction.editReply(
