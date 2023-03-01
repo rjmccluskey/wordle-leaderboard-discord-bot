@@ -30,7 +30,6 @@ export async function handleSlashCommands(interaction: BaseInteraction) {
   if (!command) return;
 
   try {
-    console.log(`Executing ${interaction.commandName} command...`);
     await command.execute(interaction);
   } catch (error) {
     console.error(error);

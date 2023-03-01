@@ -1,5 +1,8 @@
 import { SlashCommandBuilder, ChatInputCommandInteraction } from "discord.js";
-import { client } from "../db";
+import {
+  createChannelLeaderboard,
+  getChannelLeaderboardByChannelId,
+} from "../db";
 import { setChannelIsEnabled } from "../cache";
 
 export const ADD_WORDLE_LEADERBOARD = "add-wordle-leaderboard";
@@ -9,25 +12,37 @@ export const data = new SlashCommandBuilder()
   .setDescription("Add Wordle Leaderboard to the current channel");
 
 export async function execute(interaction: ChatInputCommandInteraction) {
-  await interaction.deferReply();
+  const discordChannelId = interaction.channelId;
+  console.log(
+    `Executing add-wordle-leaderboard command on channel ${discordChannelId}...`
+  );
 
-  const existingLeaderboard = await client.channelLeaderboard.findUnique({
-    where: { discordChannelId: interaction.channelId },
-  });
+  await interaction.deferReply();
+  const existingLeaderboard = await getChannelLeaderboardByChannelId(
+    discordChannelId
+  );
   if (existingLeaderboard) {
     await interaction.editReply(
-      "Wordle Leaderboard has already been enabled for this channel."
+      "Wordle Leaderboard has already been added for this channel."
+    );
+    console.log(
+      `Command finished. Wordle Leaderboard already added to channel ${discordChannelId}.`
     );
     return;
   }
 
-  await client.channelLeaderboard.create({
-    data: {
-      discordChannelId: interaction.channelId,
-    },
-  });
-  setChannelIsEnabled(interaction.channelId, true);
+  console.log(
+    `Creating and backfilling new leaderboard for channel ${discordChannelId}...`
+  );
+  await createChannelLeaderboard({ discordChannelId });
+
+  // TODO: Backfill scores before enabling
+
+  setChannelIsEnabled(discordChannelId, true);
   await interaction.editReply(
     "Wordle Leaderboard has been added! Scores will be posted daily at midnight."
+  );
+  console.log(
+    `Command finished. Wordle Leaderboard added to channel ${discordChannelId}.`
   );
 }
