@@ -5,9 +5,9 @@ import {
 } from "discord.js";
 import {
   createChannelLeaderboard,
+  enableChannel,
   getChannelLeaderboardByChannelId,
 } from "../db";
-import { setChannelIsEnabled } from "../cache";
 import { backfillChannelScores } from "../backfillChannelScores";
 
 export const ADD_WORDLE_LEADERBOARD = "add-wordle-leaderboard";
@@ -54,7 +54,8 @@ export async function execute(interaction: ChatInputCommandInteraction) {
     interaction.channel as TextChannel
   );
 
-  setChannelIsEnabled(discordChannelId, true);
+  await enableChannel(discordChannelId);
+
   await interaction.editReply(
     "Wordle Leaderboard has been added! Scores will be posted daily at midnight."
   );

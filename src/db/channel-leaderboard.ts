@@ -19,7 +19,7 @@ export async function createChannelLeaderboard({
   return client.channelLeaderboard.create({
     data: {
       discordChannelId,
-      enabled
+      enabled,
     },
   });
 }
@@ -39,4 +39,12 @@ export async function channelIsEnabled(channelId: string): Promise<boolean> {
 
   setChannelIsEnabled(channelId, false);
   return false;
+}
+
+export async function enableChannel(channelId: string): Promise<void> {
+  await client.channelLeaderboard.update({
+    where: { discordChannelId: channelId },
+    data: { enabled: true },
+  });
+  setChannelIsEnabled(channelId, true);
 }
