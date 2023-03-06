@@ -39,9 +39,7 @@ export async function execute(interaction: ChatInputCommandInteraction) {
   console.log(
     `Creating and backfilling new leaderboard for channel ${discordChannelId}...`
   );
-  const channelLeaderboard = await createChannelLeaderboard({
-    discordChannelId,
-  });
+  await createChannelLeaderboard({ discordChannelId });
 
   if (!interaction.channel) {
     console.error(
@@ -49,10 +47,7 @@ export async function execute(interaction: ChatInputCommandInteraction) {
     );
     return;
   }
-  await backfillChannelScores(
-    channelLeaderboard.id,
-    interaction.channel as TextChannel
-  );
+  await backfillChannelScores(interaction.channel as TextChannel);
 
   await enableChannel(discordChannelId);
 

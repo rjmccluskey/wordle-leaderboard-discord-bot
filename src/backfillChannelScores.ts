@@ -5,30 +5,19 @@ import {
 } from "./extractWordleResult";
 import { saveWordleResults } from "./db";
 
-export async function backfillChannelScores(
-  channelLeaderboardId: string,
-  channel: TextChannel
-) {
+export async function backfillChannelScores(channel: TextChannel) {
   const wordleResultMessages = await fetchAllWordleResultMessages(channel);
-  await saveWordleResultsFromWordleResultMessages(
-    channelLeaderboardId,
-    wordleResultMessages
-  );
+  await saveWordleResultsFromWordleResultMessages(wordleResultMessages);
 }
 
 async function saveWordleResultsFromWordleResultMessages(
-  channelLeaderboardId: string,
   wordleResultMessages: WordleResultMessage[]
 ): Promise<void> {
   const wordleResults = wordleResultMessages.map((wordleResultMessage) => ({
-    channelLeaderboardId,
     ...wordleResultMessage.extractedWordleResult,
     discordChannelId: wordleResultMessage.message.channelId,
-    discordUser: {
-      userId: wordleResultMessage.message.author.id,
-      username: wordleResultMessage.message.author.username,
-      avatar: wordleResultMessage.message.author.avatar,
-    },
+    discordUserId: wordleResultMessage.message.author.id,
+    discordUsername: wordleResultMessage.message.author.username,
     createdAt: wordleResultMessage.message.createdAt,
   }));
   await saveWordleResults(wordleResults);

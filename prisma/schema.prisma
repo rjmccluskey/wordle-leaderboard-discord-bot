@@ -49,15 +49,17 @@ model MonthlyScore {
 }
 
 model WordleResult {
-  id                   String             @id @default(auto()) @map("_id") @db.ObjectId
-  discordChannelId     String
-  channelLeaderboard   ChannelLeaderboard @relation(fields: [channelLeaderboardId], references: [id])
-  channelLeaderboardId String             @db.ObjectId
-  discordUser          DiscordUser
-  gameNumber           Int
-  score                Int?
-  raw                  String
-  createdAt            DateTime           @default(now())
+  id                 String             @id @default(auto()) @map("_id") @db.ObjectId
+  discordChannelId   String
+  channelLeaderboard ChannelLeaderboard @relation(fields: [discordChannelId], references: [discordChannelId])
+  discordUserId      String
+  discordUsername    String
+  gameNumber         Int
+  score              Int?
+  raw                String
+  createdAt          DateTime           @default(now())
+
+  @@unique([discordChannelId, discordUserId, gameNumber])
 }
 
 type DiscordUser {
