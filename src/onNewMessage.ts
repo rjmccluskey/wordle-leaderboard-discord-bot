@@ -21,7 +21,20 @@ export async function onNewMessage(message: Message): Promise<void> {
     console.log(
       `New wordle result posted on channel ${wordleResult.discordChannelId} by user ${wordleResult.discordUserId}`
     );
+
+    await message.react(
+      wordleResult.score ? reactionByScore[wordleResult.score] : "😵"
+    );
   } catch (error) {
     console.error(error);
   }
 }
+
+const reactionByScore: { [score: number]: string } = {
+  1: "🤯",
+  2: "🔥",
+  3: "👏",
+  4: "👍",
+  5: "😅",
+  6: "😬",
+};
