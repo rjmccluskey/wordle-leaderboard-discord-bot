@@ -18,6 +18,7 @@ model ChannelLeaderboard {
   updatedAt        DateTime       @updatedAt
   monthlyScores    MonthlyScore[]
   allTimeScores    AllTimeScore[]
+  wordleResults    WordleResult[]
 }
 
 model AllTimeScore {
@@ -48,17 +49,19 @@ model MonthlyScore {
 }
 
 model WordleResult {
-  id               String      @id @default(auto()) @map("_id") @db.ObjectId
-  discordChannelId String
-  discordUser      DiscordUser
-  gameNumber       Int
-  score            Int?
-  raw              String
-  createdAt        DateTime    @default(now())
+  id                   String             @id @default(auto()) @map("_id") @db.ObjectId
+  discordChannelId     String
+  channelLeaderboard   ChannelLeaderboard @relation(fields: [channelLeaderboardId], references: [id])
+  channelLeaderboardId String             @db.ObjectId
+  discordUser          DiscordUser
+  gameNumber           Int
+  score                Int?
+  raw                  String
+  createdAt            DateTime           @default(now())
 }
 
 type DiscordUser {
   userId   String
   username String
-  avatar   String
+  avatar   String?
 }

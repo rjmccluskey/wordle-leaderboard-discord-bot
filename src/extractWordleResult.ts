@@ -1,6 +1,6 @@
 export type ExtractedWordleResult = {
-  gameNumber: Number;
-  score: Number | null;
+  gameNumber: number;
+  score: number | null;
   raw: string;
 };
 
