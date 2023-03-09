@@ -3,11 +3,14 @@ import {
   ExtractedWordleResult,
   extractWordleResult,
 } from "./extractWordleResult";
-import { saveWordleResults } from "./db";
+import { saveWordleResults, NewAllTimeScore, saveAllTimeScores } from "./db";
 
 export async function backfillChannelScores(channel: TextChannel) {
   const wordleResultMessages = await fetchAllWordleResultMessages(channel);
-  await saveWordleResultsFromWordleResultMessages(wordleResultMessages);
+  await Promise.all([
+    saveWordleResultsFromWordleResultMessages(wordleResultMessages),
+    saveAllTimeScoresFromWordleResultMessages(wordleResultMessages),
+  ]);
 }
 
 async function saveWordleResultsFromWordleResultMessages(
@@ -72,4 +75,66 @@ async function fetchAllWordleResultMessages(
 
     lastId = fetchedMessages.lastKey();
   }
+}
+
+async function saveAllTimeScoresFromWordleResultMessages(
+  wordleResultMessages: WordleResultMessage[]
+): Promise<void> {
+  const byGameNumber = wordleResultMessages.reduce(
+    (acc, wordleResultMessage) => {
+      const gameNumber = wordleResultMessage.extractedWordleResult.gameNumber;
+      if (!acc[gameNumber]) {
+        acc[gameNumber] = [];
+      }
+      acc[gameNumber].push(wordleResultMessage);
+      return acc;
+    },
+    {} as { [gameNumber: number]: WordleResultMessage[] }
+  );
+
+  const allTimeScoresByUserid: {
+    [userId: string]: NewAllTimeScore;
+  } = {};
+  Object.values(byGameNumber).forEach((wordleResultMessages) => {
+    let winnerUserIds: string[] = [];
+    let winningScore: number | null = null;
+    wordleResultMessages.forEach((wordleResultMessage) => {
+      const discordUserId = wordleResultMessage.message.author.id;
+      const discordUsername = wordleResultMessage.message.author.username;
+      const discordChannelId = wordleResultMessage.message.channelId;
+      const score = wordleResultMessage.extractedWordleResult.score;
+      if (!allTimeScoresByUserid[discordUserId]) {
+        allTimeScoresByUserid[discordUserId] = {
+          discordUserId,
+          discordUsername,
+          discordChannelId,
+          totalPlayed: 0,
+          totalWins: 0,
+          totalTies: 0,
+        };
+      }
+
+      if (score === winningScore) {
+        winnerUserIds.push(discordUserId);
+      } else if (
+        score !== null &&
+        (winningScore === null || score < winningScore)
+      ) {
+        winningScore = score;
+        winnerUserIds = [discordUserId];
+      }
+
+      allTimeScoresByUserid[discordUserId].totalPlayed++;
+    });
+
+    if (winnerUserIds.length === 1) {
+      allTimeScoresByUserid[winnerUserIds[0]].totalWins++;
+    } else {
+      winnerUserIds.forEach((discordUserId) => {
+        allTimeScoresByUserid[discordUserId].totalTies++;
+      });
+    }
+  });
+
+  await saveAllTimeScores(Object.values(allTimeScoresByUserid));
 }

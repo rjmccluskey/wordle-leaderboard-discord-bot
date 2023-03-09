@@ -22,16 +22,16 @@ model ChannelLeaderboard {
 }
 
 model AllTimeScore {
-  id                   String             @id @default(auto()) @map("_id") @db.ObjectId
-  discordChannelId     String
-  channelLeaderboard   ChannelLeaderboard @relation(fields: [channelLeaderboardId], references: [id])
-  channelLeaderboardId String             @db.ObjectId
-  discordUser          DiscordUser
-  totalPlayed          Int
-  totalWins            Int
-  totalTies            Int
-  createdAt            DateTime           @default(now())
-  updatedAt            DateTime           @updatedAt
+  id                 String             @id @default(auto()) @map("_id") @db.ObjectId
+  discordChannelId   String
+  channelLeaderboard ChannelLeaderboard @relation(fields: [discordChannelId], references: [discordChannelId])
+  discordUserId      String
+  discordUsername    String
+  totalPlayed        Int
+  totalWins          Int
+  totalTies          Int
+  createdAt          DateTime           @default(now())
+  updatedAt          DateTime           @updatedAt
 }
 
 model MonthlyScore {
