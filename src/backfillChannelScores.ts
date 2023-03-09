@@ -4,13 +4,22 @@ import {
   extractWordleResult,
 } from "./extractWordleResult";
 import { saveWordleResults, NewAllTimeScore, saveAllTimeScores } from "./db";
+import { getLastCompletedGameNumber } from "./game-number";
 
-export async function backfillChannelScores(channel: TextChannel) {
+export async function backfillChannelScores(
+  channel: TextChannel
+): Promise<number> {
+  const lastCompletedGameNumber = getLastCompletedGameNumber();
   const wordleResultMessages = await fetchAllWordleResultMessages(channel);
   await Promise.all([
     saveWordleResultsFromWordleResultMessages(wordleResultMessages),
-    saveAllTimeScoresFromWordleResultMessages(wordleResultMessages),
+    saveAllTimeScoresFromWordleResultMessages(
+      wordleResultMessages,
+      lastCompletedGameNumber
+    ),
   ]);
+
+  return lastCompletedGameNumber;
 }
 
 async function saveWordleResultsFromWordleResultMessages(
@@ -78,11 +87,14 @@ async function fetchAllWordleResultMessages(
 }
 
 async function saveAllTimeScoresFromWordleResultMessages(
-  wordleResultMessages: WordleResultMessage[]
+  wordleResultMessages: WordleResultMessage[],
+  lastCompletedGameNumber: number
 ): Promise<void> {
   const byGameNumber = wordleResultMessages.reduce(
     (acc, wordleResultMessage) => {
       const gameNumber = wordleResultMessage.extractedWordleResult.gameNumber;
+      if (gameNumber > lastCompletedGameNumber) return acc;
+
       if (!acc[gameNumber]) {
         acc[gameNumber] = [];
       }

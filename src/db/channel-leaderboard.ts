@@ -48,3 +48,13 @@ export async function enableChannel(channelId: string): Promise<void> {
   });
   setChannelIsEnabled(channelId, true);
 }
+
+export async function setLastGameNumber(
+  discordChannelId: string,
+  lastGameNumber: number
+): Promise<void> {
+  await client.channelLeaderboard.update({
+    where: { discordChannelId },
+    data: { lastGameNumber },
+  });
+}

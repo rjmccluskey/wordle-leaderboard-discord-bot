@@ -7,6 +7,7 @@ import {
   createChannelLeaderboard,
   enableChannel,
   getChannelLeaderboardByChannelId,
+  setLastGameNumber,
 } from "../db";
 import { backfillChannelScores } from "../backfillChannelScores";
 
@@ -47,8 +48,11 @@ export async function execute(interaction: ChatInputCommandInteraction) {
     );
     return;
   }
-  await backfillChannelScores(interaction.channel as TextChannel);
+  const lastCompletedGameNumber = await backfillChannelScores(
+    interaction.channel as TextChannel
+  );
 
+  await setLastGameNumber(discordChannelId, lastCompletedGameNumber);
   await enableChannel(discordChannelId);
 
   await interaction.editReply(
