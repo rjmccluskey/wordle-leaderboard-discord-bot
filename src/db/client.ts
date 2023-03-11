@@ -16,7 +16,6 @@ if (process.env.NODE_ENV === "development") {
 export type {
   AllTimeScore,
   ChannelLeaderboard,
-  DiscordUser,
   MonthlyScore,
   WordleResult,
 } from "@prisma/client";

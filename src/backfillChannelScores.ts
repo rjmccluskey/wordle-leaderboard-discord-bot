@@ -3,8 +3,17 @@ import {
   ExtractedWordleResult,
   extractWordleResult,
 } from "./extractWordleResult";
-import { saveWordleResults, NewAllTimeScore, saveAllTimeScores } from "./db";
-import { getLastCompletedGameNumber } from "./game-number";
+import {
+  saveWordleResults,
+  NewAllTimeScore,
+  saveAllTimeScores,
+  NewMonthlyScore,
+  saveMonthlyScores,
+} from "./db";
+import {
+  getLastCompletedGameNumber,
+  getMonthByGameNumber,
+} from "./game-number";
 
 export async function backfillChannelScores(
   channel: TextChannel
@@ -13,7 +22,7 @@ export async function backfillChannelScores(
   const wordleResultMessages = await fetchAllWordleResultMessages(channel);
   await Promise.all([
     saveWordleResultsFromWordleResultMessages(wordleResultMessages),
-    saveAllTimeScoresFromWordleResultMessages(
+    saveScoresFromWordleResultMessages(
       wordleResultMessages,
       lastCompletedGameNumber
     ),
@@ -86,7 +95,7 @@ async function fetchAllWordleResultMessages(
   }
 }
 
-async function saveAllTimeScoresFromWordleResultMessages(
+async function saveScoresFromWordleResultMessages(
   wordleResultMessages: WordleResultMessage[],
   lastCompletedGameNumber: number
 ): Promise<void> {
@@ -107,16 +116,35 @@ async function saveAllTimeScoresFromWordleResultMessages(
   const allTimeScoresByUserid: {
     [userId: string]: NewAllTimeScore;
   } = {};
-  Object.values(byGameNumber).forEach((wordleResultMessages) => {
+  const monthlyScoresMap: {
+    [month: string]: { [userId: string]: NewMonthlyScore };
+  } = {};
+  for (const gameNumber in byGameNumber) {
     let winnerUserIds: string[] = [];
     let winningScore: number | null = null;
-    wordleResultMessages.forEach((wordleResultMessage) => {
+    const month = getMonthByGameNumber(parseInt(gameNumber, 10));
+
+    byGameNumber[gameNumber].forEach((wordleResultMessage) => {
       const discordUserId = wordleResultMessage.message.author.id;
       const discordUsername = wordleResultMessage.message.author.username;
       const discordChannelId = wordleResultMessage.message.channelId;
       const score = wordleResultMessage.extractedWordleResult.score;
       if (!allTimeScoresByUserid[discordUserId]) {
         allTimeScoresByUserid[discordUserId] = {
+          discordUserId,
+          discordUsername,
+          discordChannelId,
+          totalPlayed: 0,
+          totalWins: 0,
+          totalTies: 0,
+        };
+      }
+      if (!monthlyScoresMap[month]) {
+        monthlyScoresMap[month] = {};
+      }
+      if (!monthlyScoresMap[month][discordUserId]) {
+        monthlyScoresMap[month][discordUserId] = {
+          month,
           discordUserId,
           discordUsername,
           discordChannelId,
@@ -137,16 +165,22 @@ async function saveAllTimeScoresFromWordleResultMessages(
       }
 
       allTimeScoresByUserid[discordUserId].totalPlayed++;
+      monthlyScoresMap[month][discordUserId].totalPlayed++;
     });
 
     if (winnerUserIds.length === 1) {
       allTimeScoresByUserid[winnerUserIds[0]].totalWins++;
+      monthlyScoresMap[month][winnerUserIds[0]].totalWins++;
     } else {
       winnerUserIds.forEach((discordUserId) => {
         allTimeScoresByUserid[discordUserId].totalTies++;
+        monthlyScoresMap[month][discordUserId].totalTies++;
       });
     }
-  });
+  }
 
-  await saveAllTimeScores(Object.values(allTimeScoresByUserid));
+  await Promise.all([
+    saveAllTimeScores(Object.values(allTimeScoresByUserid)),
+    saveMonthlyScores(Object.values(monthlyScoresMap).flatMap(Object.values)),
+  ]);
 }

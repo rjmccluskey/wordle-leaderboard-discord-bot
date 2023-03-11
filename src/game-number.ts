@@ -31,7 +31,16 @@ export function getDateByGameNumber(gameNumber: number): Date {
   return addDays(seedDate, daysSinceSeed);
 }
 
+const monthByGameNumberCache: { [gameNumber: number]: string } = {};
+
 export function getMonthByGameNumber(gameNumber: number): string {
-  const date = getDateByGameNumber(gameNumber);
-  return formatInTimeZone(date, timeZone, "yyyy-MM");
+  if (!monthByGameNumberCache[gameNumber]) {
+    const date = getDateByGameNumber(gameNumber);
+    monthByGameNumberCache[gameNumber] = formatInTimeZone(
+      date,
+      timeZone,
+      "yyyy-MM"
+    );
+  }
+  return monthByGameNumberCache[gameNumber];
 }
