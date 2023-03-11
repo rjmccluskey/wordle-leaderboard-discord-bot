@@ -1,4 +1,4 @@
-import { differenceInCalendarDays } from "date-fns";
+import { differenceInCalendarDays, addDays } from "date-fns";
 import { toDate, formatInTimeZone } from "date-fns-tz";
 
 const seedGameNumber = 627;
@@ -23,4 +23,15 @@ export function getGameNumberByDate(date: Date): number {
 
 export function getLastCompletedGameNumber(): number {
   return getGameNumberByDate(new Date()) - 1;
+}
+
+export function getDateByGameNumber(gameNumber: number): Date {
+  const seedDate = toDate(seedDateString, { timeZone });
+  const daysSinceSeed = gameNumber - seedGameNumber;
+  return addDays(seedDate, daysSinceSeed);
+}
+
+export function getMonthByGameNumber(gameNumber: number): string {
+  const date = getDateByGameNumber(gameNumber);
+  return formatInTimeZone(date, timeZone, "yyyy-MM");
 }
