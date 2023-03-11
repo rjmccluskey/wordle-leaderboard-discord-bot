@@ -20,6 +20,7 @@ export async function createChannelLeaderboard({
     data: {
       discordChannelId,
       enabled,
+      lastGameNumber: 0,
     },
   });
 }
@@ -57,4 +58,12 @@ export async function setLastGameNumber(
     where: { discordChannelId },
     data: { lastGameNumber },
   });
+}
+
+export async function getChannelLeaderboards({
+  enabled = true,
+}: {
+  enabled?: boolean;
+} = {}): Promise<ChannelLeaderboard[]> {
+  return client.channelLeaderboard.findMany({ where: { enabled } });
 }
