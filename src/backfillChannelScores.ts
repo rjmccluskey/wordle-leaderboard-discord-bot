@@ -5,7 +5,7 @@ import {
 } from "./extractWordleResult";
 import { saveWordleResults, WordleResultForSave } from "./db";
 import { getLastCompletedGameNumber } from "./game-number";
-import { saveScoresForChannel } from "./saveLatestScores";
+import { saveScoresForChannel } from "./saveScoresForChannel";
 
 export async function backfillChannelScores(
   channel: TextChannel
