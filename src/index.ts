@@ -2,7 +2,7 @@ import { Client, Events, GatewayIntentBits } from "discord.js";
 import cron from "node-cron";
 import { handleSlashCommands } from "./commands";
 import { onNewMessage } from "./onNewMessage";
-import { saveLatestScores } from "./saveLatestScores";
+import { saveAndAnnounceLatestScores } from "./saveAndAnnounceLatestScores";
 
 const client = new Client({
   intents: [
@@ -23,7 +23,7 @@ client.login(process.env.CLIENT_TOKEN);
 
 // Run every day at 12:05am
 // The extra 5 minutes hopefully helps if the bot is first added right before midnight and is still backfilling.
-cron.schedule("5 0 * * *", saveLatestScores, {
+cron.schedule("5 0 * * *", saveAndAnnounceLatestScores, {
   timezone: "America/Los_Angeles",
   scheduled: process.env.NODE_ENV === "production",
 });

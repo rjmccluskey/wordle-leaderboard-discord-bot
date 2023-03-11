@@ -6,7 +6,7 @@ import {
 import { getLastCompletedGameNumber } from "./game-number";
 import { saveScoresForChannel } from "./saveScoresForChannel";
 
-export async function saveLatestScores() {
+export async function saveAndAnnounceLatestScores() {
   const channelLeaderboards = await getChannelLeaderboards();
   for (const { discordChannelId, lastGameNumber } of channelLeaderboards) {
     console.log(`Saving scores for channel ${discordChannelId}...`);
