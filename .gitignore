@@ -1,6 +1,7 @@
 node_modules
 dist
 .env
+pm2config.json
 
 # Prettier
 build
