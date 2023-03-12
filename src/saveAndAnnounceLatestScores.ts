@@ -6,6 +6,7 @@ import {
 import { getLastCompletedGameNumber } from "./game-number";
 import { saveScoresForChannel } from "./saveScoresForChannel";
 import { announceScoresForChannel } from "./announceScoresForChannel";
+import { announceWinnerForChannel } from "./announceWinnerForChannel";
 
 export async function saveAndAnnounceLatestScores() {
   try {
@@ -42,5 +43,6 @@ async function saveAndAnnounceChannelScores(
   console.log(`Done saving scores for channel ${discordChannelId}.`);
 
   console.log(`Announcing scores for channel ${discordChannelId}...`);
+  await announceWinnerForChannel(discordChannelId);
   await announceScoresForChannel(discordChannelId, maxGameNumber);
 }

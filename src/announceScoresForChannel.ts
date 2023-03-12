@@ -1,5 +1,4 @@
-import { TextChannel, EmbedBuilder, bold } from "discord.js";
-import { client } from "./client";
+import { bold, EmbedBuilder } from "discord.js";
 import {
   AllTimeScoreForSave,
   getRankedAllTimeScoresForChannel,
@@ -7,9 +6,10 @@ import {
   MonthlyScoreForSave,
 } from "./db";
 import {
-  getMonthByGameNumber,
   getDisplayMonthByGameNumber,
+  getMonthByGameNumber,
 } from "./game-number";
+import { getChannel } from "./getChannel";
 
 export async function announceScoresForChannel(
   discordChannelId: string,
@@ -45,15 +45,6 @@ export async function announceScoresForChannel(
   );
 
   await channel.send({ embeds: [monthlyScoresEmbed, allTimeScoresEmbed] });
-}
-
-async function getChannel(discordChannelId: string): Promise<TextChannel> {
-  const channel = await client.channels.cache.get(discordChannelId);
-  if (!channel) {
-    throw new Error(`Channel ${discordChannelId} not found`);
-  }
-
-  return channel as TextChannel;
 }
 
 function addRankedScoresToEmbed(
