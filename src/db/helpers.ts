@@ -30,3 +30,27 @@ export async function upsertMany<T extends { id?: string }>(
       )
   );
 }
+
+export function rankOrderedScores<
+  T extends { totalWins: number; totalTies: number; totalPlayed: number }
+>(orderedScores: T[]): T[][] {
+  return orderedScores.reduce((acc, score) => {
+    if (acc.length === 0) {
+      acc.push([score]);
+      return acc;
+    }
+
+    const current = acc[acc.length - 1];
+    if (
+      current[0].totalWins === score.totalWins &&
+      current[0].totalTies === score.totalTies &&
+      current[0].totalPlayed === score.totalPlayed
+    ) {
+      current.push(score);
+      return acc;
+    }
+
+    acc.push([score]);
+    return acc;
+  }, [] as T[][]);
+}

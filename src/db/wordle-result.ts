@@ -40,11 +40,11 @@ export async function getWordleResultsForChannel({
   return client.wordleResult.findMany({
     where: {
       discordChannelId,
-      ...(minGameNumber !== null && {
-        gameNumber: { gte: minGameNumber },
-      }),
-      ...(maxGameNumber !== null && {
-        gameNumber: { lte: maxGameNumber },
+      ...((minGameNumber || maxGameNumber) && {
+        gameNumber: {
+          ...(minGameNumber && { gte: minGameNumber }),
+          ...(maxGameNumber && { lte: maxGameNumber }),
+        },
       }),
     },
   });

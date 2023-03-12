@@ -10,6 +10,7 @@ import {
   setLastGameNumber,
 } from "../db";
 import { backfillChannelScores } from "../backfillChannelScores";
+import { announceScoresForChannel } from "../announceScoresForChannel";
 
 export const ADD_WORDLE_LEADERBOARD = "add-wordle-leaderboard";
 
@@ -56,8 +57,12 @@ export async function execute(interaction: ChatInputCommandInteraction) {
   await enableChannel(discordChannelId);
 
   await interaction.editReply(
-    "Wordle Leaderboard has been added! Scores will be posted daily at midnight."
+    "Wordle Leaderboard has been added! New scores will be posted daily around midnight. The current scores are..."
   );
+
+  console.log(`Announcing scores for channel ${discordChannelId}...`);
+  await announceScoresForChannel(discordChannelId, lastCompletedGameNumber);
+
   console.log(
     `Command finished. Wordle Leaderboard added to channel ${discordChannelId}.`
   );

@@ -1,6 +1,6 @@
 import { client, AllTimeScore } from "./client";
 import { Optional } from "utility-types";
-import { upsertMany } from "./helpers";
+import { rankOrderedScores, upsertMany } from "./helpers";
 
 export type AllTimeScoreForSave = Optional<
   AllTimeScore,
@@ -21,4 +21,27 @@ export async function getAllTimeScoresForChannel(
       discordChannelId,
     },
   });
+}
+
+export async function getRankedAllTimeScoresForChannel(
+  discordChannelId: string
+): Promise<AllTimeScore[][]> {
+  const orderedScores = await client.allTimeScore.findMany({
+    where: {
+      discordChannelId,
+    },
+    orderBy: [
+      {
+        totalWins: "desc",
+      },
+      {
+        totalTies: "desc",
+      },
+      {
+        totalPlayed: "desc",
+      },
+    ],
+  });
+
+  return rankOrderedScores(orderedScores);
 }

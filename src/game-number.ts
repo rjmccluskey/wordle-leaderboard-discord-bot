@@ -44,3 +44,8 @@ export function getMonthByGameNumber(gameNumber: number): string {
   }
   return monthByGameNumberCache[gameNumber];
 }
+
+export function getDisplayMonthByGameNumber(gameNumber: number): string {
+  const date = getDateByGameNumber(gameNumber);
+  return formatInTimeZone(date, timeZone, "MMMM");
+}
