@@ -5,6 +5,9 @@
   "description": "",
   "author": "Rich McCluskey",
   "license": "ISC",
+  "engines": {
+    "node": ">=16.9.0"
+  },
   "main": "dist/index.js",
   "scripts": {
     "build": "prisma generate && tsc",
