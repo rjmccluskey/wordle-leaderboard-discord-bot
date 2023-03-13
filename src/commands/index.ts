@@ -24,10 +24,20 @@ export const commands: Commands = {
 };
 
 export async function handleSlashCommands(interaction: BaseInteraction) {
-  if (!interaction.isChatInputCommand()) return;
+  if (!interaction.isChatInputCommand()) {
+    console.log(
+      `Ignoring non-chat-input command on channel ${interaction.channelId}`
+    );
+    return;
+  }
 
   const command = commands[interaction.commandName];
-  if (!command) return;
+  if (!command) {
+    console.log(
+      `Ignoring unknown command ${interaction.commandName} on channel ${interaction.channelId}`
+    );
+    return;
+  }
 
   try {
     await command.execute(interaction);

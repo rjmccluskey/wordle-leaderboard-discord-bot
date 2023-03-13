@@ -4,11 +4,24 @@ import { channelIsEnabled, saveWordleResultIfNotExists } from "./db";
 
 export async function onNewMessage(message: Message): Promise<void> {
   try {
-    if (message.author.bot) return;
-    if (!(await channelIsEnabled(message.channelId))) return;
+    if (message.author.bot) {
+      console.log(`Ignoring message on channel ${message.channelId} from bot`);
+      return;
+    }
+    if (!(await channelIsEnabled(message.channelId))) {
+      console.log(
+        `Ignoring message on channel ${message.channelId} because leaderboard is not enabled`
+      );
+      return;
+    }
 
     const extractedResult = extractWordleResult(message.content);
-    if (!extractedResult) return;
+    if (!extractedResult) {
+      console.log(
+        `Ignoring message on channel ${message.channelId} because it is not a wordle result`
+      );
+      return;
+    }
 
     const wordleResult = await saveWordleResultIfNotExists({
       ...extractedResult,
@@ -16,7 +29,12 @@ export async function onNewMessage(message: Message): Promise<void> {
       discordUserId: message.author.id,
       discordUsername: message.author.username,
     });
-    if (!wordleResult) return;
+    if (!wordleResult) {
+      console.log(
+        `Ignoring message on channel ${message.channelId} because it is a duplicate wordle result`
+      );
+      return;
+    }
 
     console.log(
       `New wordle result posted on channel ${wordleResult.discordChannelId} by user ${wordleResult.discordUserId}`
