@@ -73,6 +73,9 @@ export async function saveScoresForChannel(
           totalTies: 0,
         };
       }
+      // Update the username in case it changed
+      allTimeScoresByUserid[discordUserId].discordUsername = discordUsername;
+
       if (!monthlyScoresMap[month]) {
         monthlyScoresMap[month] = {};
       }
@@ -87,6 +90,8 @@ export async function saveScoresForChannel(
           totalTies: 0,
         };
       }
+      // Update the username in case it changed
+      monthlyScoresMap[month][discordUserId].discordUsername = discordUsername;
 
       if (score === winningScore) {
         winnerUserIds.push(discordUserId);

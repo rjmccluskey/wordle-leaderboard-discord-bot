@@ -27,13 +27,16 @@ export async function backfillChannelScores(
 async function saveWordleResultsFromWordleResultMessages(
   wordleResultMessages: WordleResultMessage[]
 ): Promise<WordleResultForSave[]> {
-  const wordleResults = wordleResultMessages.map((wordleResultMessage) => ({
-    ...wordleResultMessage.extractedWordleResult,
-    discordChannelId: wordleResultMessage.message.channelId,
-    discordUserId: wordleResultMessage.message.author.id,
-    discordUsername: wordleResultMessage.message.author.username,
-    createdAt: wordleResultMessage.message.createdAt,
-  }));
+  const wordleResults = wordleResultMessages.map((wordleResultMessage) => {
+    const message = wordleResultMessage.message;
+    return {
+      ...wordleResultMessage.extractedWordleResult,
+      discordChannelId: message.channelId,
+      discordUserId: message.author.id,
+      discordUsername: message.member?.displayName || message.author.username,
+      createdAt: message.createdAt,
+    };
+  });
   await saveWordleResults(wordleResults);
   return wordleResults;
 }

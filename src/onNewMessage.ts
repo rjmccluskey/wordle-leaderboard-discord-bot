@@ -27,7 +27,7 @@ export async function onNewMessage(message: Message): Promise<void> {
       ...extractedResult,
       discordChannelId: message.channelId,
       discordUserId: message.author.id,
-      discordUsername: message.author.username,
+      discordUsername: message.member?.displayName || message.author.username,
     });
     if (!wordleResult) {
       console.log(
