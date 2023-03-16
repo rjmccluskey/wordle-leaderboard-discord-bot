@@ -2,7 +2,7 @@ import { PrismaClient } from "@prisma/client";
 import { client } from "./client";
 import { omit } from "lodash";
 
-export async function upsertMany<T extends { id?: string }>(
+export async function upsertMany<T extends { id?: string; updatedAt?: Date }>(
   entity: keyof Omit<
     PrismaClient,
     | "$on"
@@ -26,7 +26,7 @@ export async function upsertMany<T extends { id?: string }>(
       .map((record) =>
         (client[entity] as any).update({
           where: { id: record.id },
-          data: omit(record, ["id"]),
+          data: omit(record, ["id", "updatedAt"]),
         })
       )
   );
