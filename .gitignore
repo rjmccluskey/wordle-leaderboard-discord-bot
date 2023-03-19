@@ -2,6 +2,7 @@ node_modules
 dist
 .env
 pm2config.json
+.DS_Store
 
 # Prettier
 build
