@@ -13,7 +13,11 @@ import { getChannel } from "./getChannel";
 
 export async function announceScoresForChannel(
   discordChannelId: string,
-  lastGameNumber: number
+  lastGameNumber: number,
+  lastScores: {
+    lastAllTimeScores?: AllTimeScoreForSave[][];
+    lastMonthlyScores?: MonthlyScoreForSave[][];
+  } = {}
 ): Promise<void> {
   const [channel, rankedAllTimeScores, rankedMonthlyScores] = await Promise.all(
     [
@@ -26,25 +30,44 @@ export async function announceScoresForChannel(
     ]
   );
 
-  const displayMonth = getDisplayMonthByGameNumber(lastGameNumber);
+  const embeds: EmbedBuilder[] = [];
 
-  let monthlyScoresEmbed = new EmbedBuilder()
-    .setColor(0x0099ff)
-    .setTitle(`${displayMonth} Wordle Leaderboard`);
-  monthlyScoresEmbed = addRankedScoresToEmbed(
-    monthlyScoresEmbed,
-    rankedMonthlyScores
-  );
+  if (
+    !lastScores.lastMonthlyScores ||
+    !rankedScoresAreEqual(lastScores.lastMonthlyScores, rankedMonthlyScores)
+  ) {
+    const displayMonth = getDisplayMonthByGameNumber(lastGameNumber);
+    let monthlyScoresEmbed = new EmbedBuilder()
+      .setColor(0x0099ff)
+      .setTitle(`${displayMonth} Leaderboard`);
+    monthlyScoresEmbed = addRankedScoresToEmbed(
+      monthlyScoresEmbed,
+      rankedMonthlyScores
+    );
+    embeds.push(monthlyScoresEmbed);
+  }
 
-  let allTimeScoresEmbed = new EmbedBuilder()
-    .setColor(0x0099ff)
-    .setTitle("All-Time Wordle Leaderboard");
-  allTimeScoresEmbed = addRankedScoresToEmbed(
-    allTimeScoresEmbed,
-    rankedAllTimeScores
-  );
+  if (
+    !lastScores.lastAllTimeScores ||
+    !rankedScoresAreEqual(lastScores.lastAllTimeScores, rankedAllTimeScores)
+  ) {
+    let allTimeScoresEmbed = new EmbedBuilder()
+      .setColor(0x0099ff)
+      .setTitle("All-Time Leaderboard");
+    allTimeScoresEmbed = addRankedScoresToEmbed(
+      allTimeScoresEmbed,
+      rankedAllTimeScores
+    );
+    embeds.push(allTimeScoresEmbed);
+  }
 
-  await channel.send({ embeds: [monthlyScoresEmbed, allTimeScoresEmbed] });
+  if (embeds.length > 0) {
+    // We don't want to say the leaderboard has changed if it's the first time announcing it.
+    if (lastScores.lastAllTimeScores && lastScores.lastAllTimeScores) {
+      await channel.send(bold("Leaderboard rankings have changed!"));
+    }
+    await channel.send({ embeds });
+  }
 }
 
 function addRankedScoresToEmbed(
@@ -82,4 +105,31 @@ function addRankedScoresToEmbed(
   });
 
   return embed;
+}
+
+function rankedScoresAreEqual(
+  rankedScores1: Array<AllTimeScoreForSave | MonthlyScoreForSave>[],
+  rankedScores2: Array<AllTimeScoreForSave | MonthlyScoreForSave>[]
+): boolean {
+  if (rankedScores1.length !== rankedScores2.length) {
+    return false;
+  }
+
+  for (let i = 0; i < rankedScores1.length; i++) {
+    const scoresForPlace1 = rankedScores1[i];
+    const scoresForPlace2 = rankedScores2[i];
+    if (scoresForPlace1.length !== scoresForPlace2.length) {
+      return false;
+    }
+
+    for (let j = 0; j < scoresForPlace1.length; j++) {
+      const score1 = scoresForPlace1[j];
+      const score2 = scoresForPlace2[j];
+      if (score1.discordUserId !== score2.discordUserId) {
+        return false;
+      }
+    }
+  }
+
+  return true;
 }

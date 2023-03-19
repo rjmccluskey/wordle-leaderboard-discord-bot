@@ -41,6 +41,7 @@ export async function getRankedAllTimeScoresForChannel(
         totalPlayed: "desc",
       },
     ],
+    take: 10,
   });
 
   return rankOrderedScores(orderedScores);

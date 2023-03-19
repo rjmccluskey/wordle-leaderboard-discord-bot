@@ -55,6 +55,7 @@ export async function getRankedMonthlyScoresForChannel(
         totalPlayed: "desc",
       },
     ],
+    take: 10,
   });
 
   return rankOrderedScores(orderedScores);

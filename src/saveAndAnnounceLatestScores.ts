@@ -1,9 +1,14 @@
 import {
   getChannelLeaderboards,
+  getRankedAllTimeScoresForChannel,
+  getRankedMonthlyScoresForChannel,
   getWordleResultsForChannel,
   setLastGameNumber,
 } from "./db";
-import { getLastCompletedGameNumber } from "./game-number";
+import {
+  getLastCompletedGameNumber,
+  getMonthByGameNumber,
+} from "./game-number";
 import { saveScoresForChannel } from "./saveScoresForChannel";
 import { announceScoresForChannel } from "./announceScoresForChannel";
 import { announceWinnerForChannel } from "./announceWinnerForChannel";
@@ -31,11 +36,19 @@ async function saveAndAnnounceChannelScores(
 
   const minGameNumber = lastGameNumber + 1;
   const maxGameNumber = getLastCompletedGameNumber();
-  const latestResults = await getWordleResultsForChannel({
-    discordChannelId,
-    minGameNumber,
-    maxGameNumber,
-  });
+  const [latestResults, lastAllTimeScores, lastMonthlyScores] =
+    await Promise.all([
+      getWordleResultsForChannel({
+        discordChannelId,
+        minGameNumber,
+        maxGameNumber,
+      }),
+      getRankedAllTimeScoresForChannel(discordChannelId),
+      getRankedMonthlyScoresForChannel(
+        discordChannelId,
+        getMonthByGameNumber(minGameNumber)
+      ),
+    ]);
 
   await saveScoresForChannel(discordChannelId, latestResults);
   await setLastGameNumber(discordChannelId, maxGameNumber);
@@ -44,5 +57,8 @@ async function saveAndAnnounceChannelScores(
 
   console.log(`Announcing scores for channel ${discordChannelId}...`);
   await announceWinnerForChannel(discordChannelId);
-  await announceScoresForChannel(discordChannelId, maxGameNumber);
+  await announceScoresForChannel(discordChannelId, maxGameNumber, {
+    lastAllTimeScores,
+    lastMonthlyScores,
+  });
 }
