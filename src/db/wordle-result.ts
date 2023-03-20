@@ -58,22 +58,20 @@ export async function getWinningResultsForChannel(
     where: {
       discordChannelId,
       gameNumber,
+      score: { not: null },
     },
     orderBy: { score: "asc" },
   });
   if (allResultsSorted.length === 0) return [];
 
-  let winners: WordleResult[] = [];
+  const winners: WordleResult[] = [];
   for (const result of allResultsSorted) {
     if (winners.length === 0) {
       winners.push(result);
       continue;
     }
 
-    const winningScore = winners[0].score;
-    if (winningScore === null && result.score !== null) {
-      winners = [result];
-    } else if (result.score === winningScore) {
+    if (result.score === winners[0].score) {
       winners.push(result);
     } else {
       break;
