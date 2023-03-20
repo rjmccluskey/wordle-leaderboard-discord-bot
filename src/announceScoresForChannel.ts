@@ -5,11 +5,12 @@ import {
   getRankedMonthlyScoresForChannel,
   MonthlyScoreForSave,
 } from "./db";
-import {
-  getDisplayMonthByGameNumber,
-  getMonthByGameNumber,
-} from "./game-number";
+import { getMonthByGameNumber } from "./game-number";
 import { getChannel } from "./getChannel";
+import {
+  buildAllTimeLeaderboardEmbed,
+  buildMonthlyLeaderboardEmbed,
+} from "./leaderboard-embeds";
 
 export async function announceScoresForChannel(
   discordChannelId: string,
@@ -36,13 +37,9 @@ export async function announceScoresForChannel(
     !lastScores.lastMonthlyScores ||
     !rankedScoresAreEqual(lastScores.lastMonthlyScores, rankedMonthlyScores)
   ) {
-    const displayMonth = getDisplayMonthByGameNumber(lastGameNumber);
-    let monthlyScoresEmbed = new EmbedBuilder()
-      .setColor(0x0099ff)
-      .setTitle(`${displayMonth} Leaderboard`);
-    monthlyScoresEmbed = addRankedScoresToEmbed(
-      monthlyScoresEmbed,
-      rankedMonthlyScores
+    const monthlyScoresEmbed = buildMonthlyLeaderboardEmbed(
+      rankedMonthlyScores,
+      lastGameNumber
     );
     embeds.push(monthlyScoresEmbed);
   }
@@ -51,13 +48,7 @@ export async function announceScoresForChannel(
     !lastScores.lastAllTimeScores ||
     !rankedScoresAreEqual(lastScores.lastAllTimeScores, rankedAllTimeScores)
   ) {
-    let allTimeScoresEmbed = new EmbedBuilder()
-      .setColor(0x0099ff)
-      .setTitle("All-Time Leaderboard");
-    allTimeScoresEmbed = addRankedScoresToEmbed(
-      allTimeScoresEmbed,
-      rankedAllTimeScores
-    );
+    let allTimeScoresEmbed = buildAllTimeLeaderboardEmbed(rankedAllTimeScores);
     embeds.push(allTimeScoresEmbed);
   }
 
@@ -68,43 +59,6 @@ export async function announceScoresForChannel(
     }
     await channel.send({ embeds });
   }
-}
-
-function addRankedScoresToEmbed(
-  embed: EmbedBuilder,
-  rankedScores: Array<AllTimeScoreForSave | MonthlyScoreForSave>[]
-): EmbedBuilder {
-  if (rankedScores.length > 0) {
-    embed.setDescription("Place - Player (Wins, Ties, Played)");
-  } else {
-    embed.setDescription("No scores yet!");
-    return embed;
-  }
-
-  let totalPlayers = 0;
-  rankedScores.forEach((scoresForPlace, placeIndex) => {
-    // There's a limit to how many fields we can add to an embed. Top ten should be good enough.
-    if (totalPlayers >= 10) {
-      return;
-    }
-
-    const place = placeIndex + 1;
-    const placePrefix =
-      place === 1 ? "🥇" : place === 2 ? "🥈" : place === 3 ? "🥉" : "";
-    const placeSuffix = place < 4 ? "" : `${place}th`;
-    const placeString = `${placePrefix} ${placeSuffix}`;
-    scoresForPlace.forEach((score) => {
-      embed.addFields({
-        name: "\u200B",
-        value: `${placeString} - ${bold(score.discordUsername)} (${
-          score.totalWins
-        }, ${score.totalTies}, ${score.totalPlayed})`,
-      });
-      totalPlayers++;
-    });
-  });
-
-  return embed;
 }
 
 function rankedScoresAreEqual(

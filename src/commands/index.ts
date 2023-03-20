@@ -5,9 +5,14 @@ import {
 } from "discord.js";
 import {
   ADD_WORDLE_LEADERBOARD,
-  data,
-  execute,
+  data as wlAddData,
+  execute as wlAddExecute,
 } from "./wl-add";
+import {
+  SHOW_WORDLE_LEADERBOARD,
+  data as wlShowData,
+  execute as wlShowExecute,
+} from "./wl-show";
 
 type Commands = {
   [commandName: string]: {
@@ -18,8 +23,12 @@ type Commands = {
 
 export const commands: Commands = {
   [ADD_WORDLE_LEADERBOARD]: {
-    data,
-    execute,
+    data: wlAddData,
+    execute: wlAddExecute,
+  },
+  [SHOW_WORDLE_LEADERBOARD]: {
+    data: wlShowData,
+    execute: wlShowExecute,
   },
 };
 
@@ -40,6 +49,9 @@ export async function handleSlashCommands(interaction: BaseInteraction) {
   }
 
   try {
+    console.log(
+      `Executing ${interaction.commandName} command on channel ${interaction.channelId}...`
+    );
     await command.execute(interaction);
   } catch (error) {
     console.error(error);

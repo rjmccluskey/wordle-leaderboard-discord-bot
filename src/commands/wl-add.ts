@@ -19,12 +19,9 @@ export const data = new SlashCommandBuilder()
   .setDescription("Add Wordle Leaderboard to the current channel");
 
 export async function execute(interaction: ChatInputCommandInteraction) {
-  const discordChannelId = interaction.channelId;
-  console.log(
-    `Executing wl-add command on channel ${discordChannelId}...`
-  );
-
   await interaction.deferReply();
+
+  const discordChannelId = interaction.channelId;
   const existingLeaderboard = await getChannelLeaderboardByChannelId(
     discordChannelId
   );
