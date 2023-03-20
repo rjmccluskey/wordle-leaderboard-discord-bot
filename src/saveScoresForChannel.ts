@@ -1,9 +1,11 @@
 import {
   AllTimeScoreForSave,
+  DailyWinnerForSave,
   getAllTimeScoresForChannel,
   getMonthlyScoresForChannel,
   MonthlyScoreForSave,
   saveAllTimeScores,
+  saveDailyWinners,
   saveMonthlyScores,
   WordleResultForSave,
 } from "./db";
@@ -53,11 +55,13 @@ export async function saveScoresForChannel(
     acc[monthlyScore.month][monthlyScore.discordUserId] = monthlyScore;
     return acc;
   }, {} as { [month: string]: { [userId: string]: MonthlyScoreForSave } });
+  const dailyWinners: DailyWinnerForSave[] = [];
 
   for (const gameNumber in byGameNumber) {
     let winnerUserIds: string[] = [];
     let winningScore: number | null = null;
-    const month = getMonthByGameNumber(parseInt(gameNumber, 10));
+    const gameNumberInt = parseInt(gameNumber, 10);
+    const month = getMonthByGameNumber(gameNumberInt);
 
     byGameNumber[gameNumber].forEach((wordleResult) => {
       const discordUserId = wordleResult.discordUserId;
@@ -93,23 +97,34 @@ export async function saveScoresForChannel(
       // Update the username in case it changed
       monthlyScoresMap[month][discordUserId].discordUsername = discordUsername;
 
-      if (score === winningScore) {
+      allTimeScoresByUserid[discordUserId].totalPlayed++;
+      monthlyScoresMap[month][discordUserId].totalPlayed++;
+
+      if (score === null) {
+        return;
+      } else if (score === winningScore) {
         winnerUserIds.push(discordUserId);
-      } else if (
-        score !== null &&
-        (winningScore === null || score < winningScore)
-      ) {
+      } else if (winningScore === null || score < winningScore) {
         winningScore = score;
         winnerUserIds = [discordUserId];
       }
-
-      allTimeScoresByUserid[discordUserId].totalPlayed++;
-      monthlyScoresMap[month][discordUserId].totalPlayed++;
     });
+
+    if (winningScore === null) {
+      continue;
+    }
 
     if (winnerUserIds.length === 1) {
       allTimeScoresByUserid[winnerUserIds[0]].totalWins++;
       monthlyScoresMap[month][winnerUserIds[0]].totalWins++;
+      dailyWinners.push({
+        discordChannelId: discordChannelId,
+        gameNumber: gameNumberInt,
+        discordUserId: winnerUserIds[0],
+        discordUsername:
+          allTimeScoresByUserid[winnerUserIds[0]].discordUsername,
+        score: winningScore,
+      });
     } else {
       winnerUserIds.forEach((discordUserId) => {
         allTimeScoresByUserid[discordUserId].totalTies++;
@@ -121,5 +136,6 @@ export async function saveScoresForChannel(
   await Promise.all([
     saveAllTimeScores(Object.values(allTimeScoresByUserid)),
     saveMonthlyScores(Object.values(monthlyScoresMap).flatMap(Object.values)),
+    saveDailyWinners(dailyWinners),
   ]);
 }

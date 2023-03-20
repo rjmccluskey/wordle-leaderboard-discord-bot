@@ -18,4 +18,5 @@ export type {
   ChannelLeaderboard,
   MonthlyScore,
   WordleResult,
+  DailyWinner,
 } from "@prisma/client";

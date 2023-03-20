@@ -35,6 +35,20 @@ model ChannelLeaderboard {
   monthlyScores    MonthlyScore[]
   allTimeScores    AllTimeScore[]
   wordleResults    WordleResult[]
+  dailyWinners     DailyWinner[]
+}
+
+model DailyWinner {
+  id                 String             @id @default(auto()) @map("_id") @db.ObjectId
+  discordChannelId   String
+  channelLeaderboard ChannelLeaderboard @relation(fields: [discordChannelId], references: [discordChannelId])
+  discordUserId      String
+  discordUsername    String
+  gameNumber         Int
+  score              Int
+  createdAt          DateTime           @default(now())
+
+  @@unique([discordChannelId, gameNumber])
 }
 
 model MonthlyScore {
