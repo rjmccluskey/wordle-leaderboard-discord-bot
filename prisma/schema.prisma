@@ -10,18 +10,6 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-model ChannelLeaderboard {
-  id               String         @id @default(auto()) @map("_id") @db.ObjectId
-  discordChannelId String         @unique
-  enabled          Boolean        @default(true)
-  lastGameNumber   Int
-  createdAt        DateTime       @default(now())
-  updatedAt        DateTime       @updatedAt
-  monthlyScores    MonthlyScore[]
-  allTimeScores    AllTimeScore[]
-  wordleResults    WordleResult[]
-}
-
 model AllTimeScore {
   id                 String             @id @default(auto()) @map("_id") @db.ObjectId
   discordChannelId   String
@@ -35,6 +23,18 @@ model AllTimeScore {
   updatedAt          DateTime           @updatedAt
 
   @@unique([discordChannelId, discordUserId])
+}
+
+model ChannelLeaderboard {
+  id               String         @id @default(auto()) @map("_id") @db.ObjectId
+  discordChannelId String         @unique
+  enabled          Boolean        @default(true)
+  lastGameNumber   Int
+  createdAt        DateTime       @default(now())
+  updatedAt        DateTime       @updatedAt
+  monthlyScores    MonthlyScore[]
+  allTimeScores    AllTimeScore[]
+  wordleResults    WordleResult[]
 }
 
 model MonthlyScore {
