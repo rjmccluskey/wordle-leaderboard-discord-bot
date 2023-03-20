@@ -1,4 +1,4 @@
-import { bold, EmbedBuilder } from "discord.js";
+import { bold, EmbedBuilder, inlineCode } from "discord.js";
 import {
   AllTimeScoreForSave,
   getRankedAllTimeScoresForChannel,
@@ -11,6 +11,7 @@ import {
   buildAllTimeLeaderboardEmbed,
   buildMonthlyLeaderboardEmbed,
 } from "./leaderboard-embeds";
+import { SHOW_WORDLE_LEADERBOARD } from "./commands/wl-show";
 
 export async function announceScoresForChannel(
   discordChannelId: string,
@@ -58,6 +59,12 @@ export async function announceScoresForChannel(
       await channel.send(bold("Leaderboard rankings have changed!"));
     }
     await channel.send({ embeds });
+  } else {
+    await channel.send(
+      `Leaderboard positions have not changed. Use the ${inlineCode(
+        `/${SHOW_WORDLE_LEADERBOARD}`
+      )} command to see the current leaderboards.`
+    );
   }
 }
 
