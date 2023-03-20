@@ -34,9 +34,16 @@ export async function announceScoresForChannel(
 
   const embeds: EmbedBuilder[] = [];
 
+  const monthlyPositionsHaveChanged =
+    lastScores.lastMonthlyScores &&
+    !rankedScoresAreEqual(lastScores.lastMonthlyScores, rankedMonthlyScores);
+  const isLastGameOfMonth =
+    getMonthByGameNumber(lastGameNumber) !==
+    getMonthByGameNumber(lastGameNumber + 1);
   if (
     !lastScores.lastMonthlyScores ||
-    !rankedScoresAreEqual(lastScores.lastMonthlyScores, rankedMonthlyScores)
+    monthlyPositionsHaveChanged ||
+    isLastGameOfMonth
   ) {
     const monthlyScoresEmbed = buildMonthlyLeaderboardEmbed(
       rankedMonthlyScores,
@@ -45,18 +52,17 @@ export async function announceScoresForChannel(
     embeds.push(monthlyScoresEmbed);
   }
 
-  if (
-    !lastScores.lastAllTimeScores ||
-    !rankedScoresAreEqual(lastScores.lastAllTimeScores, rankedAllTimeScores)
-  ) {
+  const allTimePositionsHaveChanged =
+    lastScores.lastAllTimeScores &&
+    !rankedScoresAreEqual(lastScores.lastAllTimeScores, rankedAllTimeScores);
+  if (!lastScores.lastAllTimeScores || allTimePositionsHaveChanged) {
     let allTimeScoresEmbed = buildAllTimeLeaderboardEmbed(rankedAllTimeScores);
     embeds.push(allTimeScoresEmbed);
   }
 
   if (embeds.length > 0) {
-    // We don't want to say the leaderboard has changed if it's the first time announcing it.
-    if (lastScores.lastAllTimeScores && lastScores.lastMonthlyScores) {
-      await channel.send(bold("Leaderboard rankings have changed!"));
+    if (monthlyPositionsHaveChanged || allTimePositionsHaveChanged) {
+      await channel.send(bold("Leaderboard positions have changed!"));
     }
     await channel.send({ embeds });
   } else {

@@ -16,9 +16,15 @@ export function buildMonthlyLeaderboardEmbed(
   lastGameNumber: number
 ): EmbedBuilder {
   const displayMonth = getDisplayMonthByGameNumber(lastGameNumber);
+  const displayMonthTomorrow = getDisplayMonthByGameNumber(lastGameNumber + 1);
+  let titleSuffix = "";
+  if (displayMonth !== displayMonthTomorrow) {
+    titleSuffix = " (FINAL RESULTS)";
+  }
+
   let monthlyScoresEmbed = new EmbedBuilder()
     .setColor(0x0099ff)
-    .setTitle(`${displayMonth} Leaderboard`);
+    .setTitle(`${displayMonth} Leaderboard${titleSuffix}`);
   return addRankedScoresToEmbed(monthlyScoresEmbed, rankedMonthlyScores);
 }
 
