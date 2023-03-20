@@ -7,7 +7,7 @@ import {
   ADD_WORDLE_LEADERBOARD,
   data,
   execute,
-} from "./add-wordle-leaderboard";
+} from "./wl-add";
 
 type Commands = {
   [commandName: string]: {

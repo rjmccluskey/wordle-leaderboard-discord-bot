@@ -12,7 +12,7 @@ import {
 import { backfillChannelScores } from "../backfillChannelScores";
 import { announceScoresForChannel } from "../announceScoresForChannel";
 
-export const ADD_WORDLE_LEADERBOARD = "add-wordle-leaderboard";
+export const ADD_WORDLE_LEADERBOARD = "wl-add";
 
 export const data = new SlashCommandBuilder()
   .setName(ADD_WORDLE_LEADERBOARD)
@@ -21,7 +21,7 @@ export const data = new SlashCommandBuilder()
 export async function execute(interaction: ChatInputCommandInteraction) {
   const discordChannelId = interaction.channelId;
   console.log(
-    `Executing add-wordle-leaderboard command on channel ${discordChannelId}...`
+    `Executing wl-add command on channel ${discordChannelId}...`
   );
 
   await interaction.deferReply();
