@@ -4,6 +4,7 @@ import {
   getMonthByGameNumber,
 } from "../game-number";
 import {
+  channelIsEnabled,
   getRankedAllTimeScoresForChannel,
   getRankedMonthlyScoresForChannel,
 } from "../db";
@@ -22,10 +23,19 @@ export const data = new SlashCommandBuilder()
 
 export async function execute(interaction: ChatInputCommandInteraction) {
   await interaction.deferReply({ ephemeral: true });
-
   const discordChannelId = interaction.channelId;
-  const lastGameNumber = getLastCompletedGameNumber();
 
+  if (!(await channelIsEnabled(discordChannelId))) {
+    await interaction.editReply(
+      "Wordle Leaderboard has not been added for this channel yet. Use `/wl-add` to add it."
+    );
+    console.log(
+      `Command finished. Wordle Leaderboard not enabled on channel ${discordChannelId}.`
+    );
+    return;
+  }
+
+  const lastGameNumber = getLastCompletedGameNumber();
   const [rankedAllTimeScores, rankedMonthlyScores] = await Promise.all([
     getRankedAllTimeScoresForChannel(discordChannelId),
     getRankedMonthlyScoresForChannel(
