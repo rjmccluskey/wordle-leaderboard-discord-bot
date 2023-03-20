@@ -55,7 +55,7 @@ export async function announceScoresForChannel(
 
   if (embeds.length > 0) {
     // We don't want to say the leaderboard has changed if it's the first time announcing it.
-    if (lastScores.lastAllTimeScores && lastScores.lastAllTimeScores) {
+    if (lastScores.lastAllTimeScores && lastScores.lastMonthlyScores) {
       await channel.send(bold("Leaderboard rankings have changed!"));
     }
     await channel.send({ embeds });
