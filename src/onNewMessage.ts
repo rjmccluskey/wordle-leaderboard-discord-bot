@@ -1,6 +1,7 @@
 import { Message } from "discord.js";
 import { extractWordleResult } from "./extractWordleResult";
 import { channelIsEnabled, saveWordleResultIfNotExists } from "./db";
+import { random } from "lodash";
 
 export async function onNewMessage(message: Message): Promise<void> {
   try {
@@ -40,19 +41,30 @@ export async function onNewMessage(message: Message): Promise<void> {
       `New wordle result posted on channel ${wordleResult.discordChannelId} by user ${wordleResult.discordUserId}`
     );
 
-    await message.react(
-      wordleResult.score ? reactionByScore[wordleResult.score] : "😵"
-    );
+    await message.react(getReactionByScore(wordleResult.score));
   } catch (error) {
     console.error(error);
   }
 }
 
-const reactionByScore: { [score: number]: string } = {
-  1: "🤯",
-  2: "🔥",
-  3: "👏",
-  4: "👍",
-  5: "😅",
-  6: "😬",
+function getReactionByScore(score: number | null): string {
+  const reactions = reactionsByScore[score || "X"];
+  return getRandomValueFromArray(reactions);
+}
+
+const reactionsByScore: { [score: number | string]: string[] } = {
+  1: ["🤯", "🏆", "🏅", "☘️"],
+  // prettier-ignore
+  2: ["🔥", "😍", "🤩", "🥳", "😲", "🤤", "🤑", "😻", "✌️", "🫰", "🫦", "🙇‍", "☄️", "💥", "🚀", "💸"],
+  // prettier-ignore
+  3: ["👏", "😁", "😋", "😎", "🤗", "🫡", "🙌", "🤘", "👌", "🤙", "💪", "✨", "🍻", "🥂"],
+  4: ["👍", "😀", "😃", "😄", "😌", "😸", "🤝", "🍺"],
+  5: ["😅", "🫠", "😯", "🤌", "👀"],
+  6: ["😬", "🤪", "😱", "😓", "🫣", "😑", "😮", "😮‍💨", "🙀", "🤏", "🙏"],
+  // prettier-ignore
+  X: ["😵", "🙃", "😖", "😩", "😢", "😭", "🫢", "😵‍💫", "🤡", "💩", "☠️", "😿", "🙅‍", "🤦‍", "🪦", "⚰️"],
 };
+
+function getRandomValueFromArray<T>(array: T[]): T {
+  return array[random(0, array.length - 1)];
+}
