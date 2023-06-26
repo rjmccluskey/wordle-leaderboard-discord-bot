@@ -1,6 +1,8 @@
 import { Optional } from "utility-types";
 import { client, WordleResult } from "./client";
 
+export type { WordleResult } from "./client";
+
 export type WordleResultForSave = Optional<WordleResult, "id" | "createdAt">;
 
 export async function saveWordleResults(

@@ -1,6 +1,10 @@
-import { Message } from "discord.js";
+import { DiscordAPIError, Message } from "discord.js";
 import { extractWordleResult } from "./extractWordleResult";
-import { channelIsEnabled, saveWordleResultIfNotExists } from "./db";
+import {
+  channelIsEnabled,
+  saveWordleResultIfNotExists,
+  WordleResult,
+} from "./db";
 import { random } from "lodash";
 
 export async function onNewMessage(message: Message): Promise<void> {
@@ -41,9 +45,30 @@ export async function onNewMessage(message: Message): Promise<void> {
       `New wordle result posted on channel ${wordleResult.discordChannelId} by user ${wordleResult.discordUserId}`
     );
 
-    await message.react(getReactionByScore(wordleResult.score));
+    await sendReaction(message, wordleResult);
   } catch (error) {
     console.error(error);
+  }
+}
+
+async function sendReaction(
+  message: Message,
+  wordleResult: WordleResult,
+  totalTries: number = 0
+): Promise<void> {
+  const emoji = getReactionByScore(wordleResult.score);
+  try {
+    await message.react(emoji);
+  } catch (e) {
+    if (e instanceof DiscordAPIError && e.code === 10014) {
+      console.error(`Unknown emoji for Discord message reaction: ${emoji}.`);
+      if (totalTries < 3) {
+        await sendReaction(message, wordleResult, ++totalTries);
+      }
+      return;
+    }
+
+    throw e;
   }
 }
 
